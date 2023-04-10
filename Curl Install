@@ -1,0 +1,45 @@
+#! bin/bash
+
+# This is intended to be a curl-able script to fully install the restart_cctv-viewer.sh shell script.
+# It should get, modify, and run the script, make it run at startup, and set up it's log file.
+
+# Set script name and the URL we are getting it from
+script_name=restart_cctv-viewer
+
+raw_github_code_URL=https://raw.githubusercontent.com/tylermatthew/cctv-viewer-memleak-fix/main/restart_cctv-viewer.sh
+
+# Get code from $raw_github_code_URL and write it as a .sh file with $script_name to /usr/local/bin/
+curl -o /usr/local/bin/"$script_name".sh "$raw_github_code_URL"
+
+# Make it executable
+chmod +x /usr/local/bin/"$script_name".sh
+
+# Ensure it will run with permissions to start and kill services, and write new directories and files
+chown root:root /usr/local/bin/"$script_name".sh
+chmod u+s /usr/local/bin/"$script_name".sh
+
+# Create an /etc/rc.local file if none exists, and add $script_name there so that it starts at system boot
+if [ ! -f /etc/rc.local ]; then
+    echo '#!/bin/sh -e' > /etc/rc.local
+    echo '#' >> /etc/rc.local
+    echo '# rc.local - executed at the end of each multiuser runlevel' >> /etc/rc.local
+    echo '#' >> /etc/rc.local
+    echo '# Make sure that the script will "exit 0" on success or any other' >> /etc/rc.local
+    echo '# value on error.' >> /etc/rc.local
+    echo 'exit 0' >> /etc/rc.local
+    chmod +x /etc/rc.local
+fi
+sed -i '$i/usr/local/bin/'"$script_name"'.sh' /etc/rc.local
+
+# Create /var/log/"$script_name".log 
+touch /var/log/"$script_name".log
+
+# Run $script_name 
+/usr/local/bin/"$script_name".sh
+
+# Print any errors to be visible to the attending user for troubleshooting, and print "Done!" upon success.
+if [ $? -eq 0 ]; then
+    echo "Done!"
+else
+    echo "An error occurred while running the script. Please check the log file for more information."
+fi
