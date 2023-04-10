@@ -1,9 +1,10 @@
 #! bin/bash
 
-# This is intended to be a curl-able script to fully install the restart_cctv-viewer.sh shell script.
-# It should get, modify, and run the script, make it run at startup, and set up it's log file.
+# This is intended to be a curl-able script to fully install the restart_cctv-viewer.sh 
+# and appropriately set up the viewing machine so that cctv-viewer is displayed at
+# least 99% of the time. 
 
-# Set script name and the URL we are getting it from
+# Lets set some functions
 script_name=restart_cctv-viewer
 
 raw_github_code_URL=https://raw.githubusercontent.com/tylermatthew/cctv-viewer-memleak-fix/main/restart_cctv-viewer.sh
@@ -20,11 +21,12 @@ chmod u+s /usr/local/bin/"$script_name".sh
 
 # Create an /etc/rc.local file if none exists, and add $script_name there so that it starts at system boot
 if [ ! -f /etc/rc.local ]; then
-    echo -en '#!/bin/sh \n # \n # rc.local - executed at the end of each multiuser runlevel \n # \n # Make sure that the script will "exit 0" on success or any other \n # value on error. \n \n exit 0' | sed 's/ //' >> /etc/rc.local
+    echo -en '#! /bin/bash \n # \n # rc.local - executed at the end of each multiuser runlevel \n # \n # Make sure that the script will "exit 0" on success or any other \n # value on error. \n \n exit 0' | sed 's/ //' >> /etc/rc.local
    
     chmod +x /etc/rc.local
 fi
 sed -i '$i/usr/local/bin/'"$script_name"'.sh' /etc/rc.local
+
 
 # Create /var/log/"$script_name".log 
 touch /var/log/"$script_name".log
