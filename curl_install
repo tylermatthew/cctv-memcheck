@@ -20,13 +20,8 @@ chmod u+s /usr/local/bin/"$script_name".sh
 
 # Create an /etc/rc.local file if none exists, and add $script_name there so that it starts at system boot
 if [ ! -f /etc/rc.local ]; then
-    echo '#!/bin/sh -e' > /etc/rc.local
-    echo '#' >> /etc/rc.local
-    echo '# rc.local - executed at the end of each multiuser runlevel' >> /etc/rc.local
-    echo '#' >> /etc/rc.local
-    echo '# Make sure that the script will "exit 0" on success or any other' >> /etc/rc.local
-    echo '# value on error.' >> /etc/rc.local
-    echo 'exit 0' >> /etc/rc.local
+    echo -en '#!/bin/sh \n # \n # rc.local - executed at the end of each multiuser runlevel \n # \n # Make sure that the script will "exit 0" on success or any other \n # value on error. \n \n exit 0' | sed 's/ //' >> /etc/rc.local
+   
     chmod +x /etc/rc.local
 fi
 sed -i '$i/usr/local/bin/'"$script_name"'.sh' /etc/rc.local
