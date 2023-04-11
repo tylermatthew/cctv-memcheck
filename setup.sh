@@ -137,9 +137,9 @@ get_tailscale
 rcv_install () {
 	curl -fL https://raw.githubusercontent.com/tylermatthew/cctv-viewer-memleak-fix/main/rcv_install.sh | sh
 	if [ $? -eq 0 ]; then
-			echo "tailscale successfully installed"
+			echo "rcv install script successfully installed"
 		else
-			echo "Error installing tailscale"
+			echo "Error installing rcv install script"
 	fi
 	
 }
