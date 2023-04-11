@@ -23,19 +23,12 @@ logfilesize_threshold=5000
 logfilesize_retain=500
 
 # before we get into our loop, let's do some housekeeping
-# first off, lets log the script starting up, and keep rc.local from hanging
-
-rc_function() {
-    echo 'Starting up restart_cctv-viewer.sh at boot time' > "$log_file"
-	return 1 # return a non-zero status
-	
-}
+# first off, lets log the script starting up
 
 if ps aux | grep -v grep | grep -q '/etc/rc.local'; then
 
     # rc.local is running
-    my_function # call the function
-	echo $? # output the exit status of the function
+ 	echo 'Starting up restart_cctv-viewer.sh at boot time' > "$log_file"
 else
 
     # rc.local is not running
