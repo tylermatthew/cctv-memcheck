@@ -25,7 +25,7 @@ logfilesize_retain=500
 # before we get into our loop, let's do some housekeeping
 # first off, lets log the script starting up, and keep rc.local from hanging
 
-rc-function() {
+rc_function() {
     echo 'Starting up restart_cctv-viewer.sh at boot time' > "$log_file"
 	return 1 # return a non-zero status
 	
