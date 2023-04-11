@@ -1,6 +1,6 @@
 #!/bin/bash
-#
-# first, we need to set the username for whatever machine this runs on, since snap's annoyingly fail to run when started by root
+
+# first, we need to set the username for whatever machine this runs on, since snaps annoyingly fail to run when started by root
 
 usr=$(ls -l /home | awk '{print $3}' | tail -n +2) # this is a pretty roundabout way to do it, but hey I avoided sed, so there's that.
 
@@ -22,13 +22,33 @@ logfilesize_threshold=5000
 # Define the number of lines to retain in the log file during its re-write
 logfilesize_retain=500
 
+# before we get into our loop, let's do some housekeeping
+# first off, lets log the script starting up, and keep rc.local from hanging
+
+rc-function() {
+    echo 'Starting up restart_cctv-viewer.sh at boot time' > "$log_file"
+	return 1 # return a non-zero status
+	
+}
+
+if ps aux | grep -v grep | grep -q '/etc/rc.local'; then
+
+    # rc.local is running
+    my_function # call the function
+	echo $? # output the exit status of the function
+else
+
+    # rc.local is not running
+	echo 'Starting up restart_cctv-viewer.sh when rc.local is not running' > "$log_file"
+fi
+
 # Check if the log file exists
 if [ ! -f "$log_file" ]; then
 
     # If it doesn't exist, create it
     touch "$log_file"
 	
-	# lets make sure the user owns the log file
+	# make sure the user owns the log file
 	chown "$usr":"$usr" "$log_file"
 fi
 
@@ -40,7 +60,7 @@ if [ $(wc -l < "$log_file") -gt $logfilesize_threshold ]; then
     mv "$log_file.tmp" "$log_file"
 fi
 
-# Start an infinite loop
+# Start our primary infinite loop of checking, stopping, and starting
 while true; do
 
     # Get the current memory usage
