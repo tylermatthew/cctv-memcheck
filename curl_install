@@ -21,17 +21,16 @@ chmod u+s /usr/local/bin/"$script_name".sh
 
 # Create an /etc/rc.local file if none exists, and add $script_name there so that it starts at system boot
 if [ ! -f /etc/rc.local ]; then
-    echo -en '#! /bin/bash \n # \n # rc.local - executed at the end of each multiuser runlevel \n # \n # Make sure that the script will "exit 0" on success or any other \n # value on error. \n \n \n exit 0' | sed 's/ //' >> /etc/rc.local
+    echo -en '#! /bin/sh -e \n # \n # rc.local - executed at the end of each multiuser runlevel \n # \n # Make sure that the script will "exit 0" on success or any other \n # value on error. \n \n \n exit 0' | sed 's/ //' >> /etc/rc.local
    
     chmod +x /etc/rc.local
 fi
-sed -i '$i/usr/local/bin/'"$script_name"'.sh' /etc/rc.local
+sed -i '$i/usr/local/bin/'"$script_name"'.sh &' /etc/rc.local
 
-
-# Create /var/log/"$script_name".log 
+# Create the log file 
 touch /var/log/"$script_name".log
 
-# Run $script_name 
+# Run the restart script
 /usr/local/bin/"$script_name".sh
 
 # Print any errors to be visible to the attending user for troubleshooting, and print "Done!" upon success.
