@@ -25,16 +25,6 @@ logfilesize_retain=500
 # before we get into our loop, let's do some housekeeping
 # first off, lets log the script starting up
 
-if ps aux | grep -v grep | grep -q '/etc/rc.local'; then
-
-    # rc.local is running
- 	echo 'Starting up restart_cctv-viewer.sh at boot time' > "$log_file"
-else
-
-    # rc.local is not running
-	echo 'Starting up restart_cctv-viewer.sh when rc.local is not running' > "$log_file"
-fi
-
 # Check if the log file exists
 if [ ! -f "$log_file" ]; then
 
@@ -43,6 +33,16 @@ if [ ! -f "$log_file" ]; then
 	
 	# make sure the user owns the log file
 	chown "$usr":"$usr" "$log_file"
+fi
+
+if ps aux | grep -v grep | grep -q '/etc/rc.local'; then
+
+    # rc.local is running
+ 	echo 'Starting up restart_cctv-viewer.sh at boot time' > "$log_file"
+else
+
+    # rc.local is not running
+	echo 'Starting up restart_cctv-viewer.sh when rc.local is not running' > "$log_file"
 fi
 
 # Check if the log file has reached the threshold
