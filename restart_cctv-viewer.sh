@@ -50,7 +50,7 @@ while true; do
     if [ $mem_usage -gt $threshold ]; then
 	
         # Log that we're stopping the service due to high memory usage
-        echo "$(date): Stopping $service_name due to high memory usage" >> $log_file
+        echo "$(date): Stopping $service_name due to memory exceeding $(expr $threshold \/ 1000000) Gb" >> "$log_file"
 
         # Kill the service and log any output or errors
         (killall $service_name 2>&1 | sed "s/^/$(date): /" >> $log_file)
@@ -66,10 +66,10 @@ while true; do
         done
 		
 		# Start the service in fullscreen and log any output or errors
-		(su -c "$service_name -k" $usr 2>&1 | sed "s/^/$(date): /" >> $log_file &)
+		(su -c "$service_name -k" $usr 2>&1 | sed "s/^/$(date): /" >> "$log_file" &)
 			
 			# Log that we're starting the service in kiosk mode after memory usage dropped below threshold
-        echo "$(date): Starting $service_name in kiosk mode after memory usage dropped below ($restart_threshold/1000000) Gb" >> "$log_file"
+        echo "$(date): Starting $service_name in kiosk mode after memory usage dropped below $(expr $restart_threshold \/ 1000000) Gb" >> "$log_file"
     fi
 
         # wait 10 seconds to give cctv-viewer time to start
@@ -79,10 +79,10 @@ while true; do
     if ! pgrep -x "$service_name" > /dev/null; then
 
         # Start the cctv-viewer program in Kiosk mode
-        (su -c "$service_name -k" $usr 2>&1 | sed "s/^/$(date): /" >> $log_file &)
+        (su -c "$service_name -k" $usr 2>&1 | sed "s/^/$(date): /" >> "$log_file" &)
 
         # Write a log entry to the cctv-viewer.log file
-        echo "$(date): Error - Started $service_name in fullscreen mode after finding it not running" >> "$log_file"
+        echo "$(date): Error - Started $service_name in kiosk mode after finding it not running" >> "$log_file"
     fi
     
     # Sleep for 1 minute before checking again
