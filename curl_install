@@ -32,7 +32,7 @@ sed -i '$i/usr/local/bin/'"$script_name"'.sh' /etc/rc.local
 touch /var/log/"$script_name".log
 
 # Run $script_name 
-/usr/local/bin/"$script_name".sh
+/usr/local/bin/"$script_name".sh &
 
 # Print any errors to be visible to the attending user for troubleshooting, and print "Done!" upon success.
 if [ $? -eq 0 ]; then
