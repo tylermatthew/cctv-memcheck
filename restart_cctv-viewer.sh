@@ -27,10 +27,10 @@ if [ ! -f "$log_file" ]; then
 
     # If it doesn't exist, create it
     touch "$log_file"
+	
+	# lets make sure the user owns the log file
+	chown "$usr":"$usr" "$log_file"
 fi
-
-# lets make sure the user owns the log file
-chown "$usr":"$usr" "$log_file"
 
 # Check if the log file has reached the threshold
 if [ $(wc -l < "$log_file") -gt $logfilesize_threshold ]; then
