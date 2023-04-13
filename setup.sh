@@ -1,4 +1,4 @@
-! /bin/bash
+#! /bin/bash
 #
 # script to get the machine up to standard with required apps and configs - assumed to be attended
 
