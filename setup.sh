@@ -1,4 +1,4 @@
-#! /bin/bash
+! /bin/bash
 #
 # script to get the machine up to standard with required apps and configs - assumed to be attended
 
@@ -123,26 +123,19 @@ if [[ "$EUID" -ne 0 ]]; then
  	exit 1
 fi
 
-# make sure the system is up to date
-echo -e "${cblu}#${cend} Checking to make sure the system is up to date..."; sleep 1
-apt-get update && apt-get upgrade
-
 # Check DNS
 
 host -t srv _ldap._tcp.google.com | grep "has SRV record" >/dev/null ||     {
-    echo -e "${cred}#${cend}${sbol}Error:${cend} DNS is broken.\n${sita}Check if Network Manager is instaled?${cend}\n"
+    echo -e "${cred}#${cend}${sbol}Error:${cend} DNS is broken.\n${sita}Allow the script to resolve?${cend}\n"
     user_response
-    service="network-manager"
-    service_check & echo -e "${cblu}#${cend} checking on ${service}...\n"; wait
-	systemctl status NetworkManager | grep "active"
-	echo -e "${cblu}#${cend} NetworIf Network Manager is working, would you like the script to fix DNS?\n"
-    user_response
-	echo -e "${cblu}#${cend} Adding cloudflare DNS..."; sleep 1
-	device=$(nmcli device show | grep -m 1 "GENERAL.DEVICE:" | awk '{print $2}')
-	nmcli connection modify "$device" ipv4.dns "1.1.1.1" ||	{
-		echo -e "${cred}#${cend}${sbol}Error:${cend} DNS is still broken.\n${sbol}This must be fixed for the script to work!${cend}"
+    echo -e "${cblu}#${cend} adding cloudflare dns..."
+    sed -i /127.0.0.53/a"nameserver 1.1.1.1" /etc/resolv.conf; sleep 1
+    if [ $? -eq 0 ]; then
+		echo -e "${cgreen}#${cend} $snap installed successfully\n"
+	else
+		echo -e "${cred}#${cend}${sbol} Error:${cend} DNS is still broken.\n${cred}#${cend}${sbol} ${sbol}This must be fixed for the script to work!${cend}"
 		exit 1
-	}
+	fi
 	echo -e "${cblu}#${cend}Checking DNS again...\n"; sleep 1
 	host -t srv _ldap._tcp.google.com | grep "has SRV record" >/dev/null ||     {
 		echo -e "${cred}#${cend}${sbol} Error:${cend} DNS is still broken.\n${cred}#${cend}${sbol} ${sbol}This must be fixed for the script to work!${cend}"
@@ -161,7 +154,6 @@ script_logo() {
 	   \ |  _ \ __| | | __ \  |  / 		Version: 0.1.0
 	 |\  |  __/ |   | | |   |   <  		Author: Tyler Johnson
 	_| \_|\___|\__|_|_|_|  _|_|\_\		only tested on Ubuntu 22.04
-
 	cctv-viewer live view kiosk setup script
 	Includes restart_cctv-viewer script to mitigate memory leak
  
@@ -212,12 +204,12 @@ user_response
 sleep 1 && clear
 
 # open the ssh port
-echo -e "Checking the ssh port...\n"
-if [ lsof -i -P -n | grep ssh | grep LISTEN ufw allow ssh -eq 0 ]; then
-	ufw allow ssh
-	echo -e "has been enabled!\n"
+echo -e "${cblu}#${cend} Checking the ssh port...\n"
+if [ lsof -i -P -n | grep ssh | grep LISTEN >/dev/null ]; then
+	echo -e "${cgre}#${cend} already enabled!\n"
 else
-	echo -e "already enabled!\n"
+	ufw allow ssh; lsof -i -P -n | grep ssh | grep LISTEN >/dev/null || echo -e "${cred}#${cend} Error: unable to start ssh\n" 
+	echo -e "${cgre}#${cend} has been enabled!\n"
 fi	
 
 user_response
@@ -244,6 +236,9 @@ curl_target="https://raw.githubusercontent.com/tylermatthew/cctv-viewer-memleak-
 curl_name="rcv install script"
 curl_install & echo -e "${cblu}#${cend} Installing and running the rcv script\n${cblu}#${cend} to keep cctv-viewer running...\n"; wait
 user_response
+
+if [ pidof restart_cctv-viewer.sh >/dev/null ||	{
+	echo -e "${cred}#${cend} Error: rcv is not running! did the $curl_name fail?"
 
 sleep 1 && clear
 
