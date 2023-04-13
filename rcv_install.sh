@@ -35,7 +35,7 @@ cat /etc/rc.local | grep $script_name >/dev/null || echo "ERROR: $script_name no
 log_own=$(ls -all /var/log/ | grep cctv | grep $usr | awk '{print $3}'); [[ $usr = $log_own ]] || echo "ERROR: $script_name log isnt owned by $usr!" && echo "$(date) ERROR: $script_name log isnt owned by $usr!" >> /var/log/$script_name.log
 
 # Run the restart script
-/usr/local/bin/"$script_name".sh
+bash /usr/local/bin/"$script_name".sh
 
 # Print any errors to be visible to the attending user for troubleshooting, and print "Done!" upon success.
 if [ $? -eq 0 ]; then
