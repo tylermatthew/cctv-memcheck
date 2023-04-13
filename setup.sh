@@ -27,17 +27,11 @@ header() {
     echo -e "${cblu}############################################################################${cend}\n"
 }
 
-header_red() {
-  clear
-  clear
-  echo -e "${cred}#########################################################################${cend}\\n"
-}
-
 # Put all of our functions in first, we may need them in some of the troubleshooting steps
 
 # First, a call and response for the attending user
 user_response() {
-    echo -e -n "\n${cblu}#${cend} Press ${sbol}Enter${cend} to continue, or ${sita}any other key${cend} to stop\n\n" && read -n 1 -s -r key
+    echo -e -n "\n${cblu}#${cend} Press ${sbol}Enter${cend} to continue, or ${sita}any other key${cend} to stop\n\n" && read -n 1 -s -r -p ' ' key
 
     if [[ "$key" = "" ]]; then    
         echo -e "${cgre}#${cend} Continuing..." && sleep 1 && clear
@@ -59,7 +53,7 @@ service_check () {
 		candidate_version=$(apt-cache policy $service | grep Candidate | awk '{print $2}')
 		if [ "$candidate_vnum" -gt "$installed_vnum" ]; then
 			echo -e "${cblu}#${cend} Updating $service from $installed_version to $candidate_version\n"; sleep 1
-			su -c "apt install --only-upgrade $service -i"			
+			su -c "apt install --only-upgrade $service -y"			
 			if [ $? -eq 0 ]; then
 				echo -e "${cblu}#${cend} $service updated from $installed_version to $candidate_version \n"
 			else
@@ -70,7 +64,7 @@ service_check () {
 		fi
 	else
 		echo -e "${cblu}#${cend} $service is not installed, installing now...\n"
-		su -c "apt install $service -i"
+		su -c "apt install $service -y"
 		if [ $? -eq 0 ]; then
 			installed_version=$(apt-cache policy $service | grep Installed | awk '{print $2}')
 			echo -e "${cblu}#${cend} $service $installed_version successfully installed\n"
@@ -124,19 +118,18 @@ curl_install () {
 
 # Check for root (SUDO).
 if [[ "$EUID" -ne 0 ]]; then
-  	header_red
+  
 	echo -e "The script need to be run as root...\n\nRun the command below to login as root\n${sbol}sudo -i${cend}\n"
- 	exit 1
+# 	exit 1
 fi
 
 # make sure the system is up to date
-# echo -e "${cblu}#${cend} Checking to make sure the system is up to date..."; sleep 1
-# apt-get update && apt-get upgrade
+echo -e "${cblu}#${cend} Checking to make sure the system is up to date..."; sleep 1
+apt-get update && apt-get upgrade
 
 # Check DNS
 
 host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
-    header_red
     echo -e "${cred}#${cend}${sbol}Error:${cend} DNS is broken.\n${sita}Check if Network Manager is instaled?${cend}\n"
     user_response
     service="network-manager"
@@ -145,14 +138,12 @@ host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
 	echo -e "${cblu}#${cend} If Network Manager is working, would you like the script to fix DNS?\n"
     user_response
 	echo -e "${cblu}#${cend} Adding cloudflare DNS..."; sleep 1
-	nmcli connection modify "Wired connection 1" ipv4.dns "1.1.1.1" ||	{
-		header_red
+	nmcli connection modify "Wired connection 1" ipv4.dns "1.1.1.1" ||		{
 		echo -e "${cred}#${cend}${sbol}Error:${cend} DNS is still broken.\n${sbol}This must be fixed for the script to work!${cend}"
 		exit 1
 	}
 	echo -e "${cblu}#${cend}Checking DNS again...\n"; sleep 1
 	host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
-		header_red
 		echo -e "${cred}#${cend}${sbol} Error:${cend} DNS is still broken.\n${cred}#${cend}${sbol} ${sbol}This must be fixed for the script to work!${cend}"
 		exit 1
 	}
