@@ -125,6 +125,10 @@ if [[ "$EUID" -ne 0 ]]; then
 # 	exit 1
 fi
 
+# make sure the system is up to date
+printf -e "${cblu}#${cend} Checking to make sure the system is up to date..."; sleep 1
+apt-get update && apt-get upgrade
+
 # Check DNS
 
 host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
