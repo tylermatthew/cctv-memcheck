@@ -1,20 +1,152 @@
 #! /bin/bash
 #
-# script to get the machine up to standard with required apps and configs
+# script to get the machine up to standard with required apps and configs - assumed to be attended
 
-# version 		0.1.0
+# version 		0.1.1
 # author		Tyler Johnson
 
-# check for root
+# A little formatting fun
+
+cend='\e[0m'        # end format
+cbla='\e[30m'       # black
+cred='\e[31m'       # red
+cgre='\e[1;32m'     # green
+cbro='\e[33m'       # brown
+cblu='\e[34m'       # blue
+cpur='\e[35m'       # purple
+ccya='\e[36m'       # cyan
+cgra='\e[37m'       # gray
+sbol='\e[1m'        # bold
+sita='\e[3m'        # italics
+cyel='\e[1;33m'     # yellow
+cwhi='\e[1;37m'     # white
+
+header() {
+    clear
+    clear
+    echo -e "${cblu}############################################################################${cend}\n"
+}
+
+# Put all of our functions in first, we may need them in some of the troubleshooting steps
+
+# First, a call and response for the attending user
+user_response() {
+    echo -e -n "\n${cblu}#${cend} Press ${sbol}Enter${cend} to continue, or ${sita}any other key${cend} to stop\n\n" && read -n 1 -s -r key
+
+    if [[ "$key" = "" ]]; then    
+        echo -e "${cgre}#${cend} Continuing..." && sleep 1 && clear
+    else    
+        echo -e "${cgre}#${cend} stopping..." && sleep 1 && exit 1
+    fi
+}
+
+# then to the installer functions
+# we start with apt 
+service="service"
+service_check () {
+
+	if [ -x "$(command -v $service)" ]; then
+		echo -e "${cblu}#${cend} $service is installed, checking version...\n"; sleep 1
+		installed_vnum=$(apt-cache policy $service | grep Installed | awk '{print $2}' | sed 's/[^0-9]*//g')
+		candidate_vnum=$(apt-cache policy $service | grep Candidate | awk '{print $2}' | sed 's/[^0-9]*//g')
+		installed_version=$(apt-cache policy $service | grep Installed | awk '{print $2}')
+		candidate_version=$(apt-cache policy $service | grep Candidate | awk '{print $2}')
+		if [ "$candidate_vnum" -gt "$installed_vnum" ]; then
+			echo -e "${cblu}#${cend} Updating $service from $installed_version to $candidate_version\n"; sleep 1
+			su -c "apt install --only-upgrade $service -i"			
+			if [ $? -eq 0 ]; then
+				echo -e "${cblu}#${cend} $service updated from $installed_version to $candidate_version \n"
+			else
+				echo -e "${cred}#${cend} Error: failed updating $service\n"
+			fi
+		else
+			echo -e "${cblu}#${cend} $service is already installed and up to date!\n"
+		fi
+	else
+		echo -e "${cblu}#${cend} $service is not installed, installing now...\n"
+		su -c "apt install $service -i"
+		if [ $? -eq 0 ]; then
+			installed_version=$(apt-cache policy $service | grep Installed | awk '{print $2}')
+			echo -e "${cblu}#${cend} $service $installed_version successfully installed\n"
+		else
+			echo -e "${cred}#${cend} Error: failed installing $service\n"
+		fi
+	fi
+
+}
+
+# now lets do the same for snap snaps
+snap="snap"
+snap_check () {
+
+	if snap list | grep -q "^$snap"; then
+		echo -e "${cblu}#${cend} $snap is installed, checking for updates\n"
+		snap refresh "$snap"; echo -e "${cblu}#${cend} updating $snap\n"
+		if [ $? -eq 0 ]; then
+			echo -e "${cblu}#${cend} $snap updated successfully\n"
+		else
+			echo -e "${cblu}#${cend} $snap is already up to date\n"
+		fi
+	else
+		echo -e "${cblu}#${cend} $snap is not installed\n"
+		snap install "$snap"; echo -e "${cblu}#${cend} installing $snap\n"
+		if [ $? -eq 0 ]; then
+			echo -e "${cblu}#${cend} $snap installed successfully\n"
+		else
+			echo -e "${cred}#${cend} Error: failed installing $snap\n"
+		fi
+	fi
+
+}
+
+
+# and one for software we need to curl in
+curl_target='curl_target'
+curl_name='curl_name'
+curl_install () {
+
+	curl -fL "$curl_target" | sh -i;
+	if [ $? -eq 0 ]; then
+			echo -e "${cblu}#${cend} $curl_name successfully installed\n"
+		else
+			echo -e "${cred}#${cend} Error installing $curl_name\n"
+	fi
+	
+}
+
+
+
+# now for some troubleshooting before we start
 
 # Check for root (SUDO).
 if [[ "$EUID" -ne 0 ]]; then
   
-	echo -e "The script need to be run as root...\\n\\n"
-	echo -e "Run the command below to login as root"
-	echo -e "sudo -i\\n"
-	exit 1
+	echo -e "The script need to be run as root...\n\nRun the command below to login as root\n${sbol}sudo -i${cend}\n"
+# 	exit 1
 fi
+
+# Check DNS
+
+host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
+    echo -e "${cred}#${cend}${sbol}Error:${cend} DNS is broken.\n${sita}Check if Network Manager is instaled?${cend}\n"
+    user_response
+    service="network-manager"
+    service_check & echo -e "${cblu}#${cend} checking on ${service}...\n"; wait
+	systemctl start "$service"
+	echo -e "${cblu}#${cend} If Network Manager is working, would you like the script to fix DNS?\n"
+    user_response
+	echo -e "${cblu}#${cend} Adding cloudflare DNS..."; sleep 1
+	nmcli connection modify "Wired connection 1" ipv4.dns "1.1.1.1" ||		{
+		echo -e "${cred}#${cend}${sbol}Error:${cend} DNS is still broken.\n${sbol}This must be fixed for the script to work!${cend}"
+		exit 1
+	}
+	echo -e "${cblu}#${cend}Checking DNS again...\n"; sleep 1
+	host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
+		echo -e "${cred}#${cend}${sbol} Error:${cend} DNS is still broken.\n${cred}#${cend}${sbol} ${sbol}This must be fixed for the script to work!${cend}"
+		exit 1
+	}
+	echo -e "${cgre}#Success!${cend}"; sleep 1
+}
 
 # show a cute little header
 script_logo() {
@@ -33,119 +165,85 @@ script_logo() {
 EOF
 }
 
+header
 script_logo
 
-read -n 1 -s -r -p "Press any key to continue"
+# Let the user back out if they didn't want to execute yet. 
 
-# First let's get some basic apps using a function we can re-call with new variables
-service="service"
+echo -e -n "${cblu}#${cend} Press ${sbol}Enter${cend} to begin, or ${sita}any other key${cend} to go back\n\n" && read -n 1 -s -r key
 
-service_check () {
+if [[ "$key" = "" ]]; then    
+    echo -e "${cgre}#${cend} Here we go!" && sleep 1 && clear
+else    
+    echo -e "${cgre}#${cend} Going back..." && sleep 1 && exit 0
+fi
 
-	if [ -x "$(command -v $service)" ]; then
-		echo "$service is installed, checking version"
-		installed_version=$(apt-cache policy $service | grep Installed | awk '{print $2}')
-		candidate_version=$(apt-cache policy $service | grep Candidate | awk '{print $2}')
-		if [ "$candidate_version" -gt "$installed_version" ]; then
-			echo "Updating $service from $installed_version to $candidate_version"
-			apt-get install --only-upgrade $service -y; echo "installing $service"
-			
-			if [ $? -eq 0 ]; then
-				echo "$service updated from $installed_version to $candidate_version"
-			else
-				echo "Error updating $service"
-			fi
-		else
-			echo "$service is already installed and up to date!"
-		fi
-	else
-		echo "$service is not installed"
-		apt-get install $service -y; echo "installing $service"
-		if [ $? -eq 0 ]; then
-			installed_version=$(apt-cache policy $service | grep Installed | awk '{print $2}')
-			echo "$service $installed_version successfully installed"
-		else
-			echo "Error installing $service"
-		fi
-	fi
 
-}
+# Now, lets start installing the software. 
+# curl
+service="curl"
+service_check & echo -e "${cblu}#${cend} checking on ${service}...\n"; wait
+user_response
 
-# now lets do the same for snap snaps
-snap="snap"
-
-snap_check () {
-
-	if snap list | grep -q "^$snap"; then
-		echo "$snap is installed, checking for updates"
-		snap refresh "$snap"; echo "updating $snap"
-		if [ $? -eq 0 ]; then
-			echo "$snap updated successfully"
-		else
-			echo "$snap is already up to date"
-		fi
-	else
-		echo "$snap is not installed"
-		snap install "$snap"; echo "installing $snap"
-		if [ $? -eq 0 ]; then
-			echo "$snap installed successfully"
-		else
-			echo "Error installing $snap"
-		fi
-	fi
-
-}
+sleep 1 && clear
 
 # htop
 service="htop"
-service_check
+service_check & echo -e "${cblu}#${cend} checking on ${service}...\n"; wait
+user_response
+
+sleep 1 && clear
 
 # nano
 service="nano"
-service_check
+service_check & echo -e "${cblu}#${cend} checking on ${service}...\n"; wait
+user_response
 
-# curl
-service="curl"
-service_check
+sleep 1 && clear
 
 # openssh-server
 service="openssh-server"
-service_check
+service_check & echo -e "${cblu}#${cend} checking on ${service}...\n"; wait
+user_response
+
+sleep 1 && clear
 
 # open the ssh port
-ufw allow ssh
+echo -e "Checking the ssh port...\n"
+if [ lsof -i -P -n | grep ssh | grep LISTEN ufw allow ssh -eq 0 ]; then
+	ufw allow ssh
+	echo -e "has been enabled!\n"
+else
+	echo -e "already enabled!\n"
+fi	
 
+user_response
+
+sleep 1 && clear
+	
 # lets install cctv-viewer
 snap="cctv-viewer"
-snap_check
+snap_check & echo -e "${cblu}#${cend} Now installing ${snap}...\n"; wait
+user_response
 
-# Lets get this machine on tailscale to guarantee access
-get_tailscale () {
-	curl -fsSL https://tailscale.com/install.sh | sh
-	if [ $? -eq 0 ]; then
-			echo "tailscale successfully installed"
-		else
-			echo "Error installing tailscale"
-	fi
-	
-}
+sleep 1 && clear
 
-get_tailscale
+# now let's get our curl scripts, and install the software requiring them
+curl_target="https://tailscale.com/install.sh"
+curl_name="Tailscale"
+curl_install & echo -e "${cblu}#${cend} Installing Tailscale...\n"; wait
 
-# Now, lets install restart_cctv-viewer.show
+user_response
 
-rcv_install () {
-	curl -fL https://raw.githubusercontent.com/tylermatthew/cctv-viewer-memleak-fix/main/rcv_install.sh | sh
-	if [ $? -eq 0 ]; then
-			echo "rcv install script successfully installed"
-		else
-			echo "Error installing rcv install script"
-	fi
-	
-}
+sleep 1 && clear
 
-rcv_install
+curl_target="https://raw.githubusercontent.com/tylermatthew/cctv-viewer-memleak-fix/main/rcv_install.sh"
+curl_name="rcv install script"
+curl_install & echo -e "${cblu}#${cend} Installing and running the rcv script\n${cblu}#${cend} to keep cctv-viewer running...\n"; wait
+user_response
 
-echo 'Everything should be done!'
-read -n 1 -s -r -p "Press any key to exit"
+sleep 1 && clear
+
+echo -e "setup script complete!\n\nPress any key to exit" && read -n 1 -s -r
+
 exit 0
