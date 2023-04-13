@@ -27,6 +27,12 @@ header() {
     echo -e "${cblu}############################################################################${cend}\n"
 }
 
+header_red() {
+  clear
+  clear
+  echo -e "${cred}#########################################################################${cend}\\n"
+}
+
 # Put all of our functions in first, we may need them in some of the troubleshooting steps
 
 # First, a call and response for the attending user
@@ -114,24 +120,23 @@ curl_install () {
 	
 }
 
-
-
 # now for some troubleshooting before we start
 
 # Check for root (SUDO).
 if [[ "$EUID" -ne 0 ]]; then
-  
+  	header_red
 	echo -e "The script need to be run as root...\n\nRun the command below to login as root\n${sbol}sudo -i${cend}\n"
-# 	exit 1
+ 	exit 1
 fi
 
 # make sure the system is up to date
-printf -e "${cblu}#${cend} Checking to make sure the system is up to date..."; sleep 1
-apt-get update && apt-get upgrade
+# echo -e "${cblu}#${cend} Checking to make sure the system is up to date..."; sleep 1
+# apt-get update && apt-get upgrade
 
 # Check DNS
 
 host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
+    header_red
     echo -e "${cred}#${cend}${sbol}Error:${cend} DNS is broken.\n${sita}Check if Network Manager is instaled?${cend}\n"
     user_response
     service="network-manager"
@@ -140,12 +145,14 @@ host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
 	echo -e "${cblu}#${cend} If Network Manager is working, would you like the script to fix DNS?\n"
     user_response
 	echo -e "${cblu}#${cend} Adding cloudflare DNS..."; sleep 1
-	nmcli connection modify "Wired connection 1" ipv4.dns "1.1.1.1" ||		{
+	nmcli connection modify "Wired connection 1" ipv4.dns "1.1.1.1" ||	{
+		header_red
 		echo -e "${cred}#${cend}${sbol}Error:${cend} DNS is still broken.\n${sbol}This must be fixed for the script to work!${cend}"
 		exit 1
 	}
 	echo -e "${cblu}#${cend}Checking DNS again...\n"; sleep 1
 	host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
+		header_red
 		echo -e "${cred}#${cend}${sbol} Error:${cend} DNS is still broken.\n${cred}#${cend}${sbol} ${sbol}This must be fixed for the script to work!${cend}"
 		exit 1
 	}
