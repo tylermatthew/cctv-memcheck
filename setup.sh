@@ -120,7 +120,7 @@ curl_install () {
 if [[ "$EUID" -ne 0 ]]; then
   
 	echo -e "The script need to be run as root...\n\nRun the command below to login as root\n${sbol}sudo -i${cend}\n"
-# 	exit 1
+ 	exit 1
 fi
 
 # make sure the system is up to date
@@ -134,8 +134,8 @@ host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
     user_response
     service="network-manager"
     service_check & echo -e "${cblu}#${cend} checking on ${service}...\n"; wait
-	systemctl start "$service"
-	echo -e "${cblu}#${cend} If Network Manager is working, would you like the script to fix DNS?\n"
+	systemctl status NetworkManager | grep "active"
+	echo -e "${cblu}#${cend} NetworIf Network Manager is working, would you like the script to fix DNS?\n"
     user_response
 	echo -e "${cblu}#${cend} Adding cloudflare DNS..."; sleep 1
 	nmcli connection modify "Wired connection 1" ipv4.dns "1.1.1.1" ||		{
