@@ -33,15 +33,15 @@ header() {
 user_response() {
     echo -e -n "\n${cblu}#${cend} Press ${sbol}Enter${cend} to continue, or ${sita}any other key${cend} to stop\n\n" && read -n 1 -s -r -p ' ' key
 
-    if [[ "$key" = "" ]]; then    
+    if [[ "$key" = "" ]]; then
         echo -e "${cgre}#${cend} Continuing..." && sleep 1 && clear
-    else    
+    else
         echo -e "${cgre}#${cend} stopping..." && sleep 1 && exit 1
     fi
 }
 
 # then to the installer functions
-# we start with apt 
+# we start with apt
 service="service"
 service_check () {
 
@@ -53,7 +53,7 @@ service_check () {
 		candidate_version=$(apt-cache policy $service | grep Candidate | awk '{print $2}')
 		if [ "$candidate_vnum" -gt "$installed_vnum" ]; then
 			echo -e "${cblu}#${cend} Updating $service from $installed_version to $candidate_version\n"; sleep 1
-			su -c "apt install --only-upgrade $service -y"			
+			su -c "apt install --only-upgrade $service -y"
 			if [ $? -eq 0 ]; then
 				echo -e "${cblu}#${cend} $service updated from $installed_version to $candidate_version \n"
 			else
@@ -111,14 +111,14 @@ curl_install () {
 		else
 			echo -e "${cred}#${cend} Error installing $curl_name\n"
 	fi
-	
+
 }
 
 # now for some troubleshooting before we start
 
 # Check for root (SUDO).
 if [[ "$EUID" -ne 0 ]]; then
-  
+
 	echo -e "The script need to be run as root...\n\nRun the command below to login as root\n${sbol}sudo -i${cend}\n"
  	exit 1
 fi
@@ -147,34 +147,34 @@ host -t srv _ldap._tcp.google.com | grep "has SRV record" >/dev/null ||     {
 # show a cute little header
 script_logo() {
   cat << "EOF"
-		
+
 	This is the
-	
+
 	  \  |      |   |_)       |    		License: GNU General Public License v3.0
 	   \ |  _ \ __| | | __ \  |  / 		Version: 0.1.0
 	 |\  |  __/ |   | | |   |   <  		Author: Tyler Johnson
 	_| \_|\___|\__|_|_|_|  _|_|\_\		only tested on Ubuntu 22.04
 	cctv-viewer live view kiosk setup script
 	Includes restart_cctv-viewer script to mitigate memory leak
- 
+
 EOF
 }
 
 header
 script_logo
 
-# Let the user back out if they didn't want to execute yet. 
+# Let the user back out if they didn't want to execute yet.
 
 echo -e -n "${cblu}#${cend} Press ${sbol}Enter${cend} to begin, or ${sita}any other key${cend} to go back\n\n" && read -n 1 -s -r key
 
-if [[ "$key" = "" ]]; then    
+if [[ "$key" = "" ]]; then
     echo -e "${cgre}#${cend} Here we go!" && sleep 1 && clear
-else    
+else
     echo -e "${cgre}#${cend} Going back..." && sleep 1 && exit 0
 fi
 
 
-# Now, lets start installing the software. 
+# Now, lets start installing the software.
 # curl
 service="curl"
 service_check & echo -e "${cblu}#${cend} checking on ${service}...\n"; wait
@@ -208,14 +208,14 @@ echo -e "${cblu}#${cend} Checking the ssh port...\n"
 if [ lsof -i -P -n | grep ssh | grep LISTEN >/dev/null ]; then
 	echo -e "${cgre}#${cend} already enabled!\n"
 else
-	ufw allow ssh; lsof -i -P -n | grep ssh | grep LISTEN >/dev/null || echo -e "${cred}#${cend} Error: unable to start ssh\n" 
+	ufw allow ssh; lsof -i -P -n | grep ssh | grep LISTEN >/dev/null || echo -e "${cred}#${cend} Error: unable to start ssh\n"
 	echo -e "${cgre}#${cend} has been enabled!\n"
-fi	
+fi
 
 user_response
 
 sleep 1 && clear
-	
+
 # lets install cctv-viewer
 snap="cctv-viewer"
 snap_check & echo -e "${cblu}#${cend} Now installing ${snap}...\n"; wait
