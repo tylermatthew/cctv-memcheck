@@ -129,7 +129,7 @@ apt-get update && apt-get upgrade
 
 # Check DNS
 
-host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
+host -t srv _ldap._tcp.google.com | grep "has SRV record" >/dev/null ||     {
     echo -e "${cred}#${cend}${sbol}Error:${cend} DNS is broken.\n${sita}Check if Network Manager is instaled?${cend}\n"
     user_response
     service="network-manager"
@@ -144,7 +144,7 @@ host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
 		exit 1
 	}
 	echo -e "${cblu}#${cend}Checking DNS again...\n"; sleep 1
-	host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
+	host -t srv _ldap._tcp.google.com | grep "has SRV record" >/dev/null ||     {
 		echo -e "${cred}#${cend}${sbol} Error:${cend} DNS is still broken.\n${cred}#${cend}${sbol} ${sbol}This must be fixed for the script to work!${cend}"
 		exit 1
 	}
