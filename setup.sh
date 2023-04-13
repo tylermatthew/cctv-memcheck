@@ -138,7 +138,8 @@ host -t srv _ldap._tcp.EXAMPLE.COM | grep "has SRV record" >/dev/null ||     {
 	echo -e "${cblu}#${cend} NetworIf Network Manager is working, would you like the script to fix DNS?\n"
     user_response
 	echo -e "${cblu}#${cend} Adding cloudflare DNS..."; sleep 1
-	nmcli connection modify "Wired connection 1" ipv4.dns "1.1.1.1" ||		{
+	device=$(nmcli device show | grep -m 1 "GENERAL.DEVICE:" | awk '{print $2}')
+	nmcli connection modify "$device" ipv4.dns "1.1.1.1" ||	{
 		echo -e "${cred}#${cend}${sbol}Error:${cend} DNS is still broken.\n${sbol}This must be fixed for the script to work!${cend}"
 		exit 1
 	}
