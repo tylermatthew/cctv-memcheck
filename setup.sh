@@ -1,9 +1,10 @@
 #! /bin/bash
 #
-# script to get the machine up to standard with required apps and configs - assumed to be attended
-
-# version 		0.1.1
-# author		Tyler Johnson
+# setup script to prepare an ubuntu linux desktop machine for cctv-viewer
+# and the rcv script! 
+# version 	0.1.1
+# author	Tyler Johnson
+### ASSUMED TO BE ATTENDED ###	### ASSUMED TO BE ATTENDED ###	### ASSUMED TO BE ATTENDED ###
 
 # A little formatting fun
 
@@ -81,17 +82,17 @@ snap_check () {
 
 	if snap list | grep -q "^$snap"; then
 		echo -e "${cblu}#${cend} $snap is installed, checking for updates\n"
-		snap refresh "$snap"; echo -e "${cblu}#${cend} updating $snap\n"
+		snap refresh "$snap"
 		if [ $? -eq 0 ]; then
 			echo -e "${cblu}#${cend} $snap updated successfully\n"
 		else
 			echo -e "${cblu}#${cend} $snap is already up to date\n"
 		fi
 	else
-		echo -e "${cblu}#${cend} $snap is not installed\n"
-		snap install "$snap"; echo -e "${cblu}#${cend} installing $snap\n"
+		echo -e "${cblu}#${cend} $snap is not installed. Attempting to install...\n"
+		snap install "$snap";
 		if [ $? -eq 0 ]; then
-			echo -e "${cblu}#${cend} $snap installed successfully\n"
+			echo -e "${cblu}#${cend} $snap installed successfully!\n"
 		else
 			echo -e "${cred}#${cend} Error: failed installing $snap\n"
 		fi
@@ -99,13 +100,12 @@ snap_check () {
 
 }
 
-
 # and one for software we need to curl in
 curl_target='curl_target'
 curl_name='curl_name'
 curl_install () {
 
-	curl -fL "$curl_target" | sh -i;
+	curl -fL "$curl_target" | bash -i;
 	if [ $? -eq 0 ]; then
 			echo -e "${cblu}#${cend} $curl_name successfully installed\n"
 		else
@@ -128,10 +128,10 @@ fi
 host -t srv _ldap._tcp.google.com | grep "has SRV record" >/dev/null ||     {
     echo -e "${cred}#${cend}${sbol}Error:${cend} DNS is broken.\n${sita}Allow the script to resolve?${cend}\n"
     user_response
-    echo -e "${cblu}#${cend} adding cloudflare dns..."
-    sed -i /127.0.0.53/a"nameserver 1.1.1.1" /etc/resolv.conf; sleep 1
+    echo -e "${cblu}#${cend} adding cloudflare dns..."; sleep 1
+    sed -i /127.0.0.53/a"nameserver 1.1.1.1" /etc/resolv.conf; 
     if [ $? -eq 0 ]; then
-		echo -e "${cgreen}#${cend} $snap installed successfully\n"
+		echo -e "${cgreen}#${cend} added!\n"
 	else
 		echo -e "${cred}#${cend}${sbol} Error:${cend} DNS is still broken.\n${cred}#${cend}${sbol} ${sbol}This must be fixed for the script to work!${cend}"
 		exit 1
@@ -205,12 +205,12 @@ sleep 1 && clear
 
 # open the ssh port
 echo -e "${cblu}#${cend} Checking the ssh port...\n"
-if [ lsof -i -P -n | grep ssh | grep LISTEN >/dev/null ]; then
-	echo -e "${cgre}#${cend} already enabled!\n"
-else
+lsof -i -P -n | grep ssh | grep LISTEN >/dev/null ||	{
 	ufw allow ssh; lsof -i -P -n | grep ssh | grep LISTEN >/dev/null || echo -e "${cred}#${cend} Error: unable to start ssh\n"
 	echo -e "${cgre}#${cend} has been enabled!\n"
-fi
+}
+
+echo -e "${cgre}#${cend} already enabled!\n"
 
 user_response
 
@@ -237,8 +237,9 @@ curl_name="rcv install script"
 curl_install & echo -e "${cblu}#${cend} Installing and running the rcv script\n${cblu}#${cend} to keep cctv-viewer running...\n"; wait
 user_response
 
-if [ pidof restart_cctv-viewer.sh >/dev/null ||	{
+pidof restart_cctv-viewer.sh >/dev/null ||	{
 	echo -e "${cred}#${cend} Error: rcv is not running! did the $curl_name fail?"
+}
 
 sleep 1 && clear
 
