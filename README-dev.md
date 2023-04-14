@@ -23,3 +23,11 @@
 # - cron checks for cctv-viewer and cctv-memcheck; recognizing an infinite loop of scripts checking on scripts is not a graceful solution...
 # - explore possibility of graceful memory cleaning ; long shot
 
+# moving from DEV to PROD
+# - ENSURE YOU ARE USING THE READY VERSION
+# - ctl+f "dev" to find development branch raw urls, replace with PROD urls
+# - Remove DEV headers
+# - ctl+f "dev" and remove any misc labels
+# - ARE YOU SURE THIS VERSION IS READY??
+# - push it babyyy
+
