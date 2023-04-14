@@ -1,16 +1,23 @@
-#! /bin/bash
-#
+#!/bin/bash
+
+# DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV #
+# DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV #
+
+# SEE README TO PREP FOR PROD ## SEE README TO PREP FOR PROD ## SEE README TO PREP FOR PROD #
+# SEE README TO PREP FOR PROD ## SEE README TO PREP FOR PROD ## SEE README TO PREP FOR PROD #
+
 #   It's...   __                                            __              __  
 #  __________/ /__   __      ____ ___  ___  ____ ___  _____/ /_  ___  _____/ /__
 # / ___/ ___/ __/ | / /_____/ __ `__ \/ _ \/ __ `__ \/ ___/ __ \/ _ \/ ___/ //_/
 #/ /__/ /__/ /_ | |/ /_____/ / / / / /  __/ / / / / / /__/ / / /  __/ /__/ ,<   
-#\___/\___/\__/ |___/     /_/ /_/ /_/\___/_/ /_/ /_/\___/_/ /_/\___/\___/_/|_| 
-#                                                                               
+#\___/\___/\__/ |___/     /_/ /_/ /_/\___/_/ /_/ /_/\___/_/ /_/\___/\___/_/|_|.bash
+#                                                                              
+#									aka: cvmc
 #	 
 #	Made by, and for:	
 #	
 #	  \  |      |   |_)       |    	License: GNU General Public License v3.0
-#	   \ |  _ \ __| | | __ \  |  / 	Version: 0.2.0
+#	   \ |  _ \ __| | | __ \  |  / 	Version: 0.2.1 - DEV
 #	 |\  |  __/ |   | | |   |   <  	Author: Tyler Johnson
 #	_| \_|\___|\__|_|_|_|  _|_|\_\	only tested on Ubuntu... so far
 #	Keeps cctv-viewer up and running, at least we hope it does! 
