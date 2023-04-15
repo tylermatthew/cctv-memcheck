@@ -12,7 +12,7 @@
 #/ /__/ /__/ /_ | |/ /_____/ / / / / /  __/ / / / / / /__/ / / /  __/ /__/ ,<   
 #\___/\___/\__/ |___/     /_/ /_/ /_/\___/_/ /_/ /_/\___/_/ /_/\___/\___/_/|_|.bash
 #
-#		Installation Script!							aka: cvmc
+#		Installation Script!							aka: cvmc_install.sh
 #		Made by:
 #	  \  |      |   |_)       |    		License: GNU General Public License v3.0
 #	   \ |  _ \ __| | | __ \  |  / 		Version: 0.2.1 - DEV
@@ -66,8 +66,8 @@ touch /var/log/"$script_name".log &>> "$slog"
 chown "$usr":"$usr" /var/log/"$script_name".log &>> "$slog"
 
 echo -e "$(date '+%F %I:%M:%S') - line$BASH_LINENO: Verifying..." >> "$slog"
-ls -l /usr/local/bin/ | grep restart >/dev/null || verr
-ls /var/log/ | grep restart >/dev/null || verr
+ls -l /usr/local/bin/ | grep cctv-m >/dev/null || verr
+ls /var/log/ | grep cctv-m >/dev/null || verr
 ls /etc | grep rc.local >/dev/null ||  verr
 cat /etc/rc.local | grep $script_name >/dev/null ||	verr
 log_own=$(ls -all /var/log/ | grep cctv | grep $usr | awk '{print $3}'); [[ $usr = $log_own ]] || verr
