@@ -11,7 +11,7 @@
 # attended installation script for -- cctv-memcheck -- and other things to meet
 # Netlink's spec of unattended playback machine for unifi protect systems.
 #  
-# version 	0.2.1 - DEV
+# version 	0.2.2 - DEV
 # author	Tyler Johnson
 
 ### ASSUMED TO BE ATTENDED ###	### ASSUMED TO BE ATTENDED ###	### ASSUMED TO BE ATTENDED ###
@@ -80,15 +80,15 @@ ghash=${cgre}#${cend}
 berr=${cbol}Error:${cend}
 
 datme() {
-    echo -e "$(date '+%F %I:%M:%S') - line$BASH_LINENO: current vars:$service, $snap, $curl_name\n" >> $slog
+    echo -e "$(date '+%F %I:%M:%S') - line$BASH_LINENO: current vars:$service, $snap, $curl_name\n" >> "$slog"
 }
 
 datmeins() {
-    echo -e "$(date '+%F %I:%M:%S') - line$BASH_LINENO: beginning install. current vars:$service, $snap, $curl_name\n" >> $slog
+    echo -e "$(date '+%F %I:%M:%S') - line$BASH_LINENO: beginning install. current vars:$service, $snap, $curl_name\n" >> "$slog"
 }
 
 datmefail() {
-    echo -e "$(date '+%F %I:%M:%S') - line$BASH_LINENO: Error: anticipated fail. current vars:$service, $snap, $curl_name\n" >> $slog
+    echo -e "$(date '+%F %I:%M:%S') - line$BASH_LINENO: Error: anticipated fail. current vars:$service, $snap, $curl_name\n" >> "$slog"
 }
 
 # Put all of our functions in first, we may need them in some of the troubleshooting steps
@@ -108,7 +108,7 @@ user_response() {
 # we start with apt
 service="service"
 service_check () {
-	
+	echo -e "$bhash Checking on $service..."
 	if [ "$(which $service)" ]; then
 		echo -e "$bhash $service is installed, checking version...\n"; sleep 1
 		instv=$(apt-cache policy $service | grep Inst | awk '{print $2}')
@@ -124,7 +124,7 @@ service_check () {
 			echo -e "$bhash $service is already installed and up to date!\n"; return 69 # code used to signal don't stop
 		fi
 	else
-		echo -e "$bhash $service is not installed, installing now...\n"; datmeins; sleep 1	# Logging before apt	
+		echo -e "$bhash $service is not installed, installing now...\n"; datmeins; sleep 1	# Logging before apt
 		if ! apt install $service -y &> "$slog"; then
 			instv=$(apt-cache policy $service | grep Installed | awk '{print $2}')
 			echo -e "$bhash $service $instv successfully installed\n"
@@ -132,7 +132,6 @@ service_check () {
 			echo -e "$rhash $berr failed installing $service\n"; datmefail
 		fi
 	fi
-
 }
 
 # now lets do the same for snap snaps
@@ -141,13 +140,14 @@ service_check () {
 
 snap="snap"
 snap_check () {
+	echo -e "$bhash Checking on $snap..."
 	datme; echo -e "snap func begin: $snap" >> "$slog"
 	if snap list | grep -q "^$snap"; then
 		echo -e "$bhash $snap is installed, checking for updates\n"; datmeins; sleep 1
 		if ! snap refresh "$snap" &> "$slog"; then
-			echo -e "$bhash $snap updated successfully\n"
-		else
 			echo -e "$bhash $snap is already up to date\n"; return 69 # code used to signal don't stop
+		else
+			echo -e "$bhash $snap updated successfully\n"
 		fi
 	else
 		echo -e "$bhash $snap is not installed. Attempting to install...\n"; datmeins; sleep 1
@@ -157,7 +157,6 @@ snap_check () {
 			echo -e "$rhash $berr failed installing $snap\n"; datmefail
 		fi
 	fi
-
 }
 
 #second function
@@ -165,29 +164,32 @@ snap_check () {
 curl_target='curl_target'
 curl_name='curl_name'
 curl_install () {
+	echo -e "$bhash Installing Tailscale...\n"; wait
 	datme; echo -e "Curl func begin: $curl_name" >> "$slog"
     if command -v "$curl_name" &> /dev/null; then
         echo -e "$bhash $curl_name is already installed. \n"; return 69 # code used to signal don't stop
     else
         echo -e "$bhash $curl_name is not installed. Attempting to install...\n"; datmeins; sleep 1
-        if curl -fL "$curl_target" | bash &> | tee "$slog"; then
-            echo -e "$bhash $curl_name installed successfully!\n"
-        else
-            echo -e "$rhash $berr failed installing $curl_name\n"; datmefail
-        fi
+		curl_dir="$PWD/$curl_name"
+	fi
+	curl -fL "$curl_target" -o "$curl_dir"
+	if bash "$curl_dir"; then
+		sleep 1
+		echo -e "\n$bhash $curl_name installed successfully!\n"
+	else
+		echo -e "$rhash $berr failed installing $curl_name\n"; datmefail
     fi
-	
 }
 
 # now, lets clean up the repeated installing services
 
-servicef() {	
+servicef() {
 	datme; echo -e "apt func begin: $service..." >> "$slog"
 	service_check
 	if [ ! $? = 69 ]; then
 		user_response
 	fi
-	sleep 1 && clear	
+	sleep 1 && clear
 }
 
 
@@ -200,11 +202,12 @@ otherf() {
 # gotta make this a function to return2
 
 sshcheck() {
-	echo -e "$bhash Checking the ssh port...\n"; datme; echo "checking ssh ports..." >> $"slog"
+	echo -e "$bhash Checking the ssh port...\n"; datme; echo "checking ssh ports..." >> "$slog"
 	ufw status | grep "22" | grep "ALLOW" >/dev/null ||	{
+		dhclient && echo -e "$bhash resetting DHCP..."
 		ufw enable &> "$slog"; wait
 		ufw allow ssh &> "$slog"; wait
-		ufw status | grep "22" | grep "ALLOW" >/dev/null || echo -e "$rhash $berr unable to start ssh\n"; return 2
+		ufw status | grep "22" | grep "ALLOW" >/dev/null || echo -e "$rhash $berr unable to start ssh\n" && return 2
 		echo -e "$ghash has been enabled!\n"
 	}
 	echo -e "$ghash enabled!\n"; return 69 # code used to signal don't stop
@@ -222,27 +225,29 @@ fi
 # setup our log files for the script
 slog="/var/log/cvmc-setup.log"
 
-if [ ! -f $slog ]; then
-	echo "# This is the log file for the cctv-memcheck setup script!\n# Created: $(date) by the setup script.\n" >> $slog
+if [ ! -f "$slog" ]; then
+	echo '# This is the log file for the cctv-memcheck setup script!\n# Created: '"$(date)"'by the setup script.\n' >> "$slog"
 else
-	echo "script ran again on $(date)" >> $slog
+	datme
+	echo "script ran again." >> "$slog"
 fi
 
 # Check DNS
 
-brokedns() 	{ 
-	echo -e "$rhash $berr DNS is still broken.\n$rhash ${cbol}This must be fixed for the script to work!${cend}" 
-	echo -e "$(date) Setup Error: DNS still Broken. Script aborted." >> 
+brokedns() 	{
+	echo -e "$rhash $berr DNS is still broken.\n$rhash ${cbol}This must be fixed for the script to work!${cend}"
+	datme
+	echo -e "Setup Error: DNS still Broken. Script aborted." >> "$slog"
 	exit 1
 }
 
 host -t srv _ldap._tcp.google.com | grep "has SRV record" >/dev/null ||	{
-	echo -e "${rhash}$berr DNS is broken.\n${sita}Allow the script to resolve?${cend}\n"; echo -e "$(date) Setup Error: Had to repair DNS..." >> 
+	echo -e "${rhash}$berr DNS is broken.\n${sita}Allow the script to resolve?${cend}\n"; datme; echo -e "Setup Error: Had to repair DNS..." >> "$slog"
 	user_response
-    echo -e "$bhash adding cloudflare dns..."; sleep 1
-    sed -i /127.0.0.53/a"nameserver 1.1.1.1" /etc/resolv.conf; 
-    if [ $? -eq 0 ]; then
-		echo -e "${cgreen}#${cend} added!\n"; echo -e "$(date) Setup Error: Added 1.1.1.1 to /etc/resolv.conf..." >> 
+    	echo -e "$bhash adding cloudflare dns..."; sleep 1
+    	sed -i /127.0.0.53/a"nameserver 1.1.1.1" /etc/resolv.conf;
+    	if [ $? -eq 0 ]; then
+		echo -e "${cgre}#${cend} added!\n"; datme; echo -e "Added 1.1.1.1 to /etc/resolv.conf..." >> "$slog"
 	else
 		brokedns # this exit's the script!
 	fi
@@ -279,26 +284,26 @@ servicef
 
 # open the ssh port
 sshcheck
+otherf
 if [ $? = 2 ]; then
-	datme; echo -e "ERROR: unable to configure ufw for ssh." >> log
+	datme; echo -e "ERROR: unable to configure ufw for ssh." >> "$slog"
 	user_response
 fi
-otherf
 
 # lets install cctv-viewer
 snap="cctv-viewer"
-snap_check & echo -e "$bhash Now installing ${snap}...\n"; wait
+snap_check
 otherf
 
 # now let's get our curl scripts, and install the software requiring them
 curl_target="https://tailscale.com/install.sh"
 curl_name="Tailscale"
-curl_install & echo -e "$bhash Installing Tailscale...\n"; wait
+curl_install
 otherf
 
 curl_target="https://raw.githubusercontent.com/tylermatthew/cctv-memcheck/Development/cvmc_install.sh"
 curl_name="cctv-memcheck"
-curl_install & echo -e "$bhash Installing cctv-memcheck...\n"; wait
+curl_install
 otherf
 
 echo -e "setup script complete!"
@@ -318,4 +323,3 @@ else
 	rm cvmc_install.sh &> /dev/null
 	exit 0
 fi
-exit 2
