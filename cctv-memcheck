@@ -25,7 +25,7 @@
 # vars and functions. maybe a config file in the future?
 
 usr=$(ls -l /home | awk '{print $3}' | tail -n +2) 
-threshold=2500000 # Set the memory threshold for stopping the service (in kilobytes)
+threshold=3000000 # Set the memory threshold for stopping the service (in kilobytes)
 restart_threshold=1000000 # Set the memory threshold for restarting the service (in kilobytes)
 service_name="cctv-viewer" # Set the name of the service to monitor
 log_file="/var/log/restart_cctv-viewer.log" # Set the path to the log file
@@ -62,12 +62,12 @@ while true; do
 		su -c "$service_name" "$usr" &>> "$log_file" &
 		echo "$(date): Error - Started $service_name in kiosk mode after finding it not running" >> "$log_file"
     fi
-	if [ $mem_usage < $restart_threshold ]; then
+	if [ $mem_usage -lt $restart_threshold ]; then
 		sleep 1200; datrep; echo -e "cctv-memcheck hibernating until $(date --date="+1200 seconds" '+%I:%M:%S')\n" >> "$log_file"
 	fi
 	mem_dif=$(expr $mem_usage - $restart_threshold)
-	if [ $mem_dif -gt 1000000 ] 
+	if [ $mem_dif -gt 1000000 ]; then
 		sleep 300; datrep; echo -e "cctv-memcheck napping until $(date --date="+300 seconds" '+%I:%M:%S')\n" >> "$log_file"
 	sleep 60 # Sleep for 1 minute before checking again
+	fi
 done
-exit 0
