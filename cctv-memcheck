@@ -28,7 +28,7 @@ usr=$(ls -l /home | awk '{print $3}' | tail -n +2)
 threshold=3000000 # Set the memory threshold for stopping the service (in kilobytes)
 restart_threshold=1000000 # Set the memory threshold for restarting the service (in kilobytes)
 service_name="cctv-viewer" # Set the name of the service to monitor
-log_file="/var/log/restart_cctv-viewer.log" # Set the path to the log file
+log_file="/var/log/cctv-memcheck.log" # Set the path to the log file
 logfilesize_threshold=5000 # Define the highest number of lines the log file should be allowed to reach
 logfilesize_retain=500 # Define the number of lines to retain in the log file during its re-write
 
