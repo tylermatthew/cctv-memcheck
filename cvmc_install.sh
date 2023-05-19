@@ -1,11 +1,5 @@
 #!/bin/bash
 
-# DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV #
-# DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV #
-
-# SEE README TO PREP FOR PROD ## SEE README TO PREP FOR PROD ## SEE README TO PREP FOR PROD #
-# SEE README TO PREP FOR PROD ## SEE README TO PREP FOR PROD ## SEE README TO PREP FOR PROD #
-
 #   The       __                                            __              __  
 #  __________/ /__   __      ____ ___  ___  ____ ___  _____/ /_  ___  _____/ /__
 # / ___/ ___/ __/ | / /_____/ __ `__ \/ _ \/ __ `__ \/ ___/ __ \/ _ \/ ___/ //_/
@@ -18,14 +12,14 @@
 #	   \ |  _ \ __| | | __ \  |  / 		Version: 0.2.1 - DEV
 #	 |\  |  __/ |   | | |   |   <  		Author: Tyler Johnson
 #	_| \_|\___|\__|_|_|_|  _|_|\_\		only tested on Ubuntu 22.04
-#	Curl-able installation script for cctv-memcheck to be called and deleted!
+#	Curl-able installation script for cctv-memcheck, to be called and deleted!
 
 # Vars
 
 usr=$(ls -l /home | awk '{print $3}' | tail -n +2)
 script_name="cctv-memcheck"
 slog="/var/log/cvmc-setup.log"
-cvmc_url="https://raw.githubusercontent.com/tylermatthew/cctv-memcheck/Development/cctv-memcheck"
+cvmc_url="https://raw.githubusercontent.com/tylermatthew/main/cctv-memcheck"
 
 rchead() {
 	echo '#!/bin/sh -e 

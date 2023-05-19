@@ -1,11 +1,5 @@
 #!/bin/bash
-
-# DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV #
-# DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV ## DEV #
-
-# SEE README TO PREP FOR PROD ## SEE README TO PREP FOR PROD ## SEE README TO PREP FOR PROD #
-# SEE README TO PREP FOR PROD ## SEE README TO PREP FOR PROD ## SEE README TO PREP FOR PROD #
-
+#
 # CVMC-SETUP-SCRIPT
 # 
 # attended installation script for -- cctv-memcheck -- and other things to meet
@@ -16,9 +10,7 @@
 
 ### ASSUMED TO BE ATTENDED ###	### ASSUMED TO BE ATTENDED ###	### ASSUMED TO BE ATTENDED ###
 
-############################################################################## LOADING FUNCTIONS
-
-# A little formatting
+# LOADING FUNCTIONS
 
 script_logo() {
   cat << "EOF"
@@ -301,7 +293,7 @@ curl_name="Tailscale"
 curl_install
 otherf
 
-curl_target="https://raw.githubusercontent.com/tylermatthew/cctv-memcheck/Development/cvmc_install.sh"
+curl_target="https://raw.githubusercontent.com/tylermatthew/cctv-memcheck/main/cvmc_install.sh"
 curl_name="cctv-memcheck"
 curl_install
 otherf
