@@ -35,18 +35,11 @@ EOF
 }
 
 cend='\e[0m'        # end format
-cbla='\e[30m'       # black
 cred='\e[31m'       # red
 cgre='\e[1;32m'     # green
-cbro='\e[33m'       # brown
 cblu='\e[34m'       # blue
-cpur='\e[35m'       # purple
-ccya='\e[36m'       # cyan
-cgra='\e[37m'       # gray
 cbol='\e[1m'        # bold
 sita='\e[3m'        # italics
-cyel='\e[1;33m'     # yellow
-cwhi='\e[1;37m'     # white
 
 hdrblu() {
     clear
@@ -210,6 +203,7 @@ sshcheck() {
 
 # Check for root (SUDO).
 if [[ "$EUID" -ne 0 ]]; then
+	hdrred
 	echo -e "The script need to be run as root...\n\nRun the command below to login as root\n${cbol}sudo -i${cend}\n"
  	exit 1
 fi
@@ -298,6 +292,7 @@ curl_name="cctv-memcheck"
 curl_install
 otherf
 
+hdrgre
 echo -e "setup script complete!"
 echo -e -n "\n$bhash Press ${cbol}Enter${cend} to run $curl_name, or ${sita}any other key${cend} to stop\n\n" && read -n 1 -s -r -p ' ' key
 if [[ "$key" = "" ]]; then
