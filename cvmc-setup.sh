@@ -5,7 +5,7 @@
 # attended installation script for -- cctv-memcheck -- and other things to meet
 # Netlink's spec of unattended playback machine for unifi protect systems.
 #  
-# version 	0.2.2 - DEV
+# version 	0.3.0 - DEV
 # author	Tyler Johnson
 
 ### ASSUMED TO BE ATTENDED ###	### ASSUMED TO BE ATTENDED ###	### ASSUMED TO BE ATTENDED ###
@@ -26,7 +26,7 @@ script_logo() {
 	Made by, and for:	
 	
 	  \  |      |   |_)       |    	License: GNU General Public License v3.0
-	   \ |  _ \ __| | | __ \  |  / 	Version: 0.1.0
+	   \ |  _ \ __| | | __ \  |  / 	Version: 0.3.0
 	 |\  |  __/ |   | | |   |   <  	Author: Tyler Johnson
 	_| \_|\___|\__|_|_|_|  _|_|\_\	only tested on Ubuntu... so far
 	Checks for needed conditions and installs needed packages. 

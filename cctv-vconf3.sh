@@ -3,7 +3,7 @@
 # cctv-vconf.sh
 # This script writes rtsp url's to the appropriate location in the "CCTV Viewer.conf" file. 
 
-filename="/home/jot1/snap/cctv-viewer/1032/.config/CCTV Viewer/CCTV Viewer.conf" # where the config file is
+filename="/home/jot3/snap/cctv-viewer/1032/.config/CCTV Viewer/CCTV Viewer.conf" # where the config file is
 
 echo "we got here"
 

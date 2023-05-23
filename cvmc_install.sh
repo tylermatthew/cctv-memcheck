@@ -9,7 +9,7 @@
 #		Installation Script!							aka: cvmc_install.sh
 #		Made by:
 #	  \  |      |   |_)       |    		License: GNU General Public License v3.0
-#	   \ |  _ \ __| | | __ \  |  / 		Version: 0.2.1 - DEV
+#	   \ |  _ \ __| | | __ \  |  / 		Version: 0.3.0 - DEV
 #	 |\  |  __/ |   | | |   |   <  		Author: Tyler Johnson
 #	_| \_|\___|\__|_|_|_|  _|_|\_\		only tested on Ubuntu 22.04
 #	Curl-able installation script for cctv-memcheck, to be called and deleted!
