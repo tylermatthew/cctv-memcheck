@@ -45,7 +45,7 @@ while true; do
     fi
 	
 # Logfile Cleanup
-	if [ $(wc -l < "$log_file") -gt $logfilesize_threshold ]; then
+	if [ "$(wc -l < $log_file)" -gt $logfilesize_threshold ]; then
 		head -n 2 "$log_file" && tail -n $logfilesize_retain "$log_file" > "$log_file.tmp"
 		mv "$log_file.tmp" "$log_file"
 	fi

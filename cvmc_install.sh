@@ -40,7 +40,6 @@ rchead() {
 # Note this script running in the setup log, create cvmc's log file, and wget cvmc
 
 echo -e "$(date '+%F %I:%M:%S') - line$BASH_LINENO: cvmc-install started" >> "$slog"
-touch "$script_location" &>> "$slog"
 wget -P /usr/local/bin/ "$cvmc_url" &>> "$slog";
 chmod +x "$script_location" &>> "$slog";
 

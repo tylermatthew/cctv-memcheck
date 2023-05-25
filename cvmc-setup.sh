@@ -1,16 +1,10 @@
 #!/bin/bash
 #
-# CVMC-SETUP-SCRIPT
-# 
-# attended installation script for -- cctv-memcheck -- and other things to meet
-# Netlink's spec of unattended playback machine for unifi protect systems.
+# CVMC-SETUP-SCRIPT - attended installation script for "cctv-memcheck" and other things to meet
+# Netlink's liveview spec for unifi protect systems.
 #  
 # version 	0.3.0 - DEV
 # author	Tyler Johnson
-
-### ASSUMED TO BE ATTENDED ###	### ASSUMED TO BE ATTENDED ###	### ASSUMED TO BE ATTENDED ###
-
-# LOADING FUNCTIONS
 
 script_logo() {
   cat << "EOF"
@@ -295,7 +289,7 @@ if [[ "$key" = "" ]]; then
 	echo -e "$ghash Starting cctv-memcheck..."
 	/usr/local/bin/cctv-memcheck
 	sleep 2
-	pgrep cctv-m >/dev/null ||	{
+	pgrep cctv-m &> /dev/null ||	{
 		echo -e "$rhash $berr cctv-memcheck is not running! did the $curlname fail?"
 	}
 	echo -e "$curlname successfully started! Exiting..." && sleep 1; clear; echo -e "The cvmc-setup log is at $slog" && sleep 1
