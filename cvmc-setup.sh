@@ -89,7 +89,7 @@ service.check.version() {
 }
 
 service.update() {
-	datemeins
+	datmeins
 	apt install --only-upgrade $service -y &> "$slog"
 }
 
@@ -287,7 +287,7 @@ echo -e "setup script complete!"
 echo -e -n "\n$bhash Press ${cbol}Enter${cend} to run $curlname, or ${sita}any other key${cend} to stop\n\n" && read -n 1 -s -r -p ' ' key
 if [[ "$key" = "" ]]; then
 	echo -e "$ghash Starting cctv-memcheck..."
-	/usr/local/bin/cctv-memcheck
+	/usr/local/bin/cctv-memcheck &
 	sleep 2
 	pgrep cctv-m &> /dev/null ||	{
 		echo -e "$rhash $berr cctv-memcheck is not running! did the $curlname fail?"
