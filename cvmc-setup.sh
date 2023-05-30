@@ -80,7 +80,6 @@ user.response() {
 }
 
 # service handling
-
 service="service"
 
 service.check.version() {
@@ -120,7 +119,6 @@ service.check() {
 }
 
 # snap handling
-
 snap="snap"
 
 snap.install() {
@@ -142,7 +140,6 @@ snap.check() {
 }
 
 #second function
-
 curltarget="curl"
 curlname="curlname"
 curl.install() {
@@ -167,34 +164,43 @@ servicef() {
 	sleep 1 && clear
 }
 
-
 otherf() {
 	if [ ! $? = 69 ]; then
 		user.response 
 	fi
 	sleep 1 && clear
 }
-# gotta make this a function to return2
 
-sshcheck() {
-	echo -e "$bhash Checking ssh...\n"; datme; echo "checking ssh ports..." >> "$slog"
-	ufw status | grep "22" | grep "ALLOW" >/dev/null ||	{
-		dhclient && echo -e "$bhash resetting DHCP..."
+# gotta make this a function to return2
+sshreset() {
+		dhclient && echo -e "$bhash resetting DHCP..."; datme; echo "attempting ssh repair..." >> "$slog"
 		ufw enable &> "$slog"; wait
 		ufw allow ssh &> "$slog"; wait
-		ufw status | grep "22" | grep "ALLOW" >/dev/null || echo -e "$rhash $berr unable to start ssh\n" && return 2
-		echo -e "$ghash SSH has been enabled!\n"
-	}
-	echo -e "$ghash enabled!\n"; return 69 # signal don't stop
+		sshstatus="$(ufw status | grep '22' | grep 'ALLOW')"
+}
+
+sshcheck() {
+	echo -e "$bhash Checking ssh...\n"; datme
+	sshstatus="$(ufw status | grep '22' | grep 'ALLOW')"
+	if [ $sshstatus > /dev/null ]; then
+		echo -e "$ghash ssh enabled!\n"; sleep 1; return 69 # signal don't stop
+	else
+		sshreset
+		if [ ! $sshstatus > /dev/null ]; then
+			echo -e "$rhash $berr unable to start ssh\n" && return 2
+		else
+			echo -e "$ghash ssh now enabled!\n"; sleep 1; return 69 #signal don't stop
+		fi
+	fi
 }
 
 ##################################################################################### FIRST COMMANDS
-# now for some troubleshooting before we start
+# troubleshooting before we start
 
 # Check for root (SUDO).
 if [[ "$EUID" -ne 0 ]]; then
 	hdrred
-	echo -e "The script need to be run as root...\n\nRun the command below to login as root\n${cbol}sudo -i${cend}\n"
+	echo -e "$rhash ${cred}The script need to be run as root...${cend}\n\nRun the command below to login as root\n\n # ${cbol}sudo -i${cend}\n"
  	exit 1
 fi
 
@@ -207,6 +213,13 @@ else
 	datme
 	echo "script ran again." >> "$slog"
 fi
+# Make sure the system is up to date
+
+updatef() {
+	datme; echo "$bhash updating the system..."; sleep 1
+	apt update; wait; 
+	apt upgrade -y
+}
 
 # Check DNS
 
@@ -242,6 +255,8 @@ script_logo; sleep 1
 user.response 
 
 # Now, lets start installing the software.
+updatef
+
 # curl
 service="curl"
 servicef
@@ -255,7 +270,7 @@ service="nano"
 servicef
 
 # openssh-server
-service="ssh"
+service="openssh-server"
 servicef
 
 # open the ssh port
