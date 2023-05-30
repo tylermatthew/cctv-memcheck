@@ -20,7 +20,6 @@ rtsp8="rtsps://192.168.1.195:7441/2Cv7gfVMXg35gEnV?enableSrtp"
 rtsp9="rtsps://192.168.1.195:7441/Jskb1XrqVmziN0Rw?enableSrtp"
 rtsp10="rtsps://192.168.1.195:7441/X6v4qIdXEkbBNkBl?enableSrtp"
 rtsp11="rtsps://192.168.1.195:7441/X6v4qIdXEkbBNkBl?enableSrtp"
-rtsp12=''
 
 echo "variables set"
 
